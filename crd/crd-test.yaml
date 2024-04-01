@@ -1,0 +1,8 @@
+apiVersion: helloworld.io/v1alpha1
+kind: Greeting
+metadata:
+  name: helloword-greeting
+spec:
+  emailToGreet: shubham.tamboli@calsoftinc.com
+  messageToGreet: Hello
+  replicas: 1

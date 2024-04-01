@@ -4,7 +4,7 @@ metadata:
     name: calsoft-deployment
     #namespace: calsoft
 spec:
-    replicas: 5
+    replicas: 15
     selector:
         matchLabels:
             env: test
@@ -15,8 +15,8 @@ spec:
         spec:
             containers:
                 - name: calsoft
-                  #image: shubh9975/simple-app:v3
-                  image: nginx
+                  image: shubh9975/simple-app:v3
+                  #image: nginx
                  
 ---
 apiVersion: v1

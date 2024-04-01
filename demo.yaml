@@ -4,7 +4,7 @@ metadata:
     name: calsoft-deployment
     #namespace: calsoft
 spec:
-    replicas: 15
+    replicas: 1
     selector:
         matchLabels:
             env: test

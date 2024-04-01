@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-    name: Helloword--deployment
+    name: Helloword-deployment
     #namespace: demo
 spec:
-    replicas: 1
+    replicas: 5
     selector:
         matchLabels:
             env: test
@@ -22,8 +22,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-    name: calsoft-service
-    #namespace: calsoft
+    name: helloword-service
+    #namespace: demo
 spec:
     type: NodePort
     ports:

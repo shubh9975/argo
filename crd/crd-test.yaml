@@ -4,5 +4,5 @@ metadata:
   name: helloword-greeting
 spec:
   emailToGreet: shubham.tamboli@calsoftinc.com
-  messageToGreet: Hello
+  messageToGreet: Hello shubham
   replicas: 1

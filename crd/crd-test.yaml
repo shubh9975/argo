@@ -5,4 +5,4 @@ metadata:
 spec:
   emailToGreet: shubham.tamboli@calsoftinc.com
   messageToGreet: Hello shubham
-  replicas: 1
+  replicas: 20

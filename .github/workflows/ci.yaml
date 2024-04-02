@@ -31,8 +31,8 @@ jobs:
   docker:
         needs: build
         runs-on: ubuntu-latest
-        outputs:
-          output1: ${{ steps.head_sha_short.outputs.name }}
+        # outputs:
+        #   output1: ${{ steps.head_sha_short.outputs.name }}
         steps:
           - name: Checkout
             uses: actions/checkout@v3
@@ -72,39 +72,32 @@ jobs:
               push: true
               tags: ${{ steps.meta.outputs.tags }}
               labels: ${{ steps.meta.outputs.labels }}
-              # -
-              #name: Build and push
-              #uses: docker/build-push-action@v4
-              #with:
-              #context: .
-              #push: true
-              #tags: shubh9975/images:app-${{ github.run_number }}
-  modifygit:
-    needs: docker
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        name: changing the deployment of git repo
-        with:
-          repository: 'shubh9975/App-Manifest-'
-          token: ${{ secrets.GIT_PASSWORD }}
+  # modifygit:
+  #   needs: docker
+  #   runs-on: ubuntu-latest
+  #   steps:
+          - uses: actions/checkout@v3
+            name: changing the deployment of git repo
+            with:
+              repository: 'shubh9975/App-Manifest-'
+              token: ${{ secrets.GIT_PASSWORD }}
             #      - name: Get HEAD SHA SHORT from Docker job
             #run: echo "Head SHA from Docker: ${{ needs.docker.outputs.head_sha_short }}"
-      - name: modify the image
-        run: |
-          git config user.email shubham.tamboli1@gmail.com
-          git config user.name Shubham
-          pwd
-          cat deployment.yaml
-          pwd
-          echo "commitID: ${{ env.COMMIT_SHA }}"
-          sed -i "s+shubh9975/images.*+shubh9975/images:${{ env.COMMIT_SHA }}+g" deployment.yaml
-          cat deployment.yaml
-          git add .
-          git commit -m 'Done  by Github Actions   Job change manifest: ${{ env.COMMIT_SHA }}'
-          git push origin main
-        env:
-          GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
-          GIT_PASSWORD: ${{ secrets.GIT_PASSWORD }}
-          RUN_NUMBER: ${{ github.run_number }}
-          COMMIT_SHA: ${{ needs.docker.outputs.output1 }}
+          - name: modify the image
+            run: |
+              git config user.email shubham.tamboli1@gmail.com
+              git config user.name Shubham
+              pwd
+              cat deployment.yaml
+              pwd
+              echo "commitID: ${{ env.COMMIT_SHA }}"
+              sed -i "s+shubh9975/images.*+shubh9975/images:${{ env.COMMIT_SHA }}+g" deployment.yaml
+              cat deployment.yaml
+              git add .
+              git commit -m 'Done  by Github Actions   Job change manifest: ${{ env.COMMIT_SHA }}'
+              git push origin main
+            env:
+              GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
+              GIT_PASSWORD: ${{ secrets.GIT_PASSWORD }}
+              RUN_NUMBER: ${{ github.run_number }}
+              COMMIT_SHA: ${{ steps.meta.outputs.tags }}

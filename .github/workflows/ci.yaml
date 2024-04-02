@@ -44,6 +44,11 @@ jobs:
               username: ${{ secrets.DOCKERHUB_USERNAME }}
               password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+          - name: Set HEAD SHA SHORT
+            id: head_sha_short
+            run: |
+              echo "::set-output name=head_sha_short::$(git rev-parse --short HEAD)"
+            shell: bash
           - name: Check HEAD SHA SHORT
             run: echo ${{ steps.head_sha_short.outputs.head_sha_short }}
             shell: bash

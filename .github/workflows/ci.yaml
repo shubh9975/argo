@@ -28,11 +28,9 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-  docker:
+  development:
         needs: build
         runs-on: ubuntu-latest
-        # outputs:
-        #   output1: ${{ steps.head_sha_short.outputs.name }}
         steps:
           - name: Checkout
             uses: actions/checkout@v3
@@ -72,17 +70,11 @@ jobs:
               push: true
               tags: ${{ steps.meta.outputs.tags }}
               labels: ${{ steps.meta.outputs.labels }}
-  # modifygit:
-  #   needs: docker
-  #   runs-on: ubuntu-latest
-  #   steps:
           - uses: actions/checkout@v3
             name: changing the deployment of git repo
             with:
               repository: 'shubh9975/App-Manifest-'
               token: ${{ secrets.GIT_PASSWORD }}
-            #      - name: Get HEAD SHA SHORT from Docker job
-            #run: echo "Head SHA from Docker: ${{ needs.docker.outputs.head_sha_short }}"
           - name: modify the image
             run: |
               git config user.email shubham.tamboli1@gmail.com

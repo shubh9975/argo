@@ -48,7 +48,7 @@ jobs:
             id: meta
             uses: docker/metadata-action@v4
             with:
-              images: ${{ shubh9975/images }}
+              images: shubh9975/images
 
           - name: Build and push the Docker image
             uses: docker/build-push-action@v4
@@ -65,29 +65,3 @@ jobs:
                 #context: .
                 #push: true
                 #tags: shubh9975/images:app-${{ github.run_number }}
-  modifygit:
-    needs: docker
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        name: changing the deployment of git repo
-        with:
-          repository: 'shubh9975/App-Manifest-'
-          token: ${{ secrets.GIT_PASSWORD }}
-      - name: modify the image
-        run: |
-          git config user.email shubham.tamboli1@gmail.com
-          git config user.name Shubham
-          pwd
-          cat deployment.yaml
-          pwd
-          echo "build no: $RUN_NUMBER"
-          sed -i "s+shubh9975/images.*+shubh9975/images:app-$RUN_NUMBER+g" deployment.yaml
-          cat deployment.yaml
-          git add .
-          git commit -m 'Done  by Github Actions   Job changemanifest: ${{ github.run_number }}'
-          git push origin main
-        env:
-          GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
-          GIT_PASSWORD: ${{ secrets.GIT_PASSWORD }}
-          RUN_NUMBER: ${{ github.run_number }}

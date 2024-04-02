@@ -54,7 +54,7 @@ jobs:
             with:
               flavor: |
                 latest=false
-             images: ${{ env.REPO_NAME }}
+              images: ${{ env.REPO_NAME }}
               tags: |
                 type=raw,value=${{ steps.head_sha_short.outputs.head_sha_short }}
 

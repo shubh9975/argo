@@ -86,6 +86,12 @@ jobs:
         with:
           repository: 'shubh9975/App-Manifest-'
           token: ${{ secrets.GIT_PASSWORD }}
+      - name: Set HEAD SHA SHORT
+        id: head_sha_short
+        run: |
+          echo "::set-output name=head_sha_short::$(git rev-parse --short HEAD)"
+        shell: bash
+
       - name: modify the image
         run: |
           git config user.email shubham.tamboli1@gmail.com

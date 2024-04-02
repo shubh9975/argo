@@ -93,11 +93,11 @@ jobs:
           pwd
           cat deployment.yaml
           pwd
-          echo "build no: $RUN_NUMBER"
+          echo "CommitID: $COMMIT_SHA"
           sed -i "s+shubh9975/images.*+shubh9975/images:$COMMIT_SHA+g" deployment.yaml
           cat deployment.yaml
           git add .
-          git commit -m 'Done  by Github Actions   Job changemanifest: ${{ github.run_number }}'
+          git commit -m 'Done  by Github Actions   Job change manifest: ${{ COMMIT_SHA }}'
           git push origin main
         env:
           GIT_USERNAME: ${{ secrets.GIT_USERNAME }}

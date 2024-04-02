@@ -25,7 +25,7 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-  docker:
+  release:
         needs: build
         runs-on: ubuntu-latest
         steps:
@@ -57,4 +57,28 @@ jobs:
               push: true
               tags: ${{ steps.meta.outputs.tags }}
               labels: ${{ steps.meta.outputs.labels }}
+
+          - uses: actions/checkout@v3
+            name: changing the deployment of git repo
+            with:
+              repository: 'shubh9975/App-Manifest-'
+              token: ${{ secrets.GIT_PASSWORD }}
+          - name: modify the image
+            run: |
+              git config user.email shubham.tamboli1@gmail.com
+              git config user.name Shubham
+              pwd
+              cat deployment.yaml
+              pwd
+              echo "commitID: ${{ env.TAG }}"
+              sed -i "s+shubh9975/images.*+shubh9975/images:${{ env.TAG }}+g" deployment.yaml
+              cat deployment.yaml
+              git add .
+              git commit -m 'Done  by Github Actions   Job change manifest: ${{ env.TAG }}'
+              git push origin main
+            env:
+              GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
+              GIT_PASSWORD: ${{ secrets.GIT_PASSWORD }}
+              RUN_NUMBER: ${{ github.run_number }}
+              TAG: ${{ steps.meta.outputs.tags }}
                 

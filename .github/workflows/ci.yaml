@@ -86,8 +86,8 @@ jobs:
         with:
           repository: 'shubh9975/App-Manifest-'
           token: ${{ secrets.GIT_PASSWORD }}
-      - name: Get HEAD SHA SHORT from Docker job
-        run: echo "Head SHA from Docker: ${{ needs.docker.outputs.head_sha_short }}"
+            #      - name: Get HEAD SHA SHORT from Docker job
+            #run: echo "Head SHA from Docker: ${{ needs.docker.outputs.head_sha_short }}"
       - name: modify the image
         run: |
           git config user.email shubham.tamboli1@gmail.com
@@ -105,4 +105,4 @@ jobs:
           GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
           GIT_PASSWORD: ${{ secrets.GIT_PASSWORD }}
           RUN_NUMBER: ${{ github.run_number }}
-          COMMIT_SHA: ${{ steps.head_sha_short.outputs.head_sha_short }}
+          COMMIT_SHA: ${{ needs.docker.outputs.head_sha_short }}

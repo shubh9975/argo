@@ -69,6 +69,7 @@ jobs:
           pwd
           cat deployment.yaml
           pwd
+          echo "build no: $RUN_NUMBER"
           sed -i "s+shubh9975/images.*+shubh9975/images:app-$RUN_NUMBER+g" deployment.yaml
           cat deployment.yaml
           git add .

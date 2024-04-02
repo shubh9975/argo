@@ -1,12 +1,9 @@
-name: Python application
+name: Build image on release
 
 on:
   push:
-    branches: 
-      - dev
-
-permissions:
-  contents: read
+    tags: 
+      - v*.*.*
 
 jobs:
   build:
@@ -47,13 +44,27 @@ jobs:
             with:
               username: ${{ secrets.DOCKERHUB_USERNAME }}
               password: ${{ secrets.DOCKERHUB_TOKEN }}
-          -
-            name: Build and push
+          - name: Docker meta
+            id: meta
+            uses: docker/metadata-action@v4
+            with:
+              images: ${{ shubh9975/images }}
+
+          - name: Build and push the Docker image
             uses: docker/build-push-action@v4
             with:
               context: .
               push: true
-              tags: shubh9975/images:app-${{ github.run_number }}
+              tags: ${{ steps.meta.outputs.tags }}
+              labels: ${{ steps.meta.outputs.labels }}
+                
+                #-
+                #name: Build and push
+                #uses: docker/build-push-action@v4
+                #with:
+                #context: .
+                #push: true
+                #tags: shubh9975/images:app-${{ github.run_number }}
   modifygit:
     needs: docker
     runs-on: ubuntu-latest

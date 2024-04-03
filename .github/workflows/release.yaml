@@ -82,7 +82,7 @@ jobs:
               pwd
               
               echo "commitID: ${{ env.TAG }}"
-              sed -i "s+shubh9975/images.*+${{ env.TAG }}+g" prod-env/release-deployment.yaml
+              awk '{gsub("shubh9975/images:.*", "shubh9975/images:${{ env.TAG }}")}1' deployment.yaml > tmpfile && mv tmpfile deployment.yaml
               cat prod-env/release-deployment.yaml
               
               git add .

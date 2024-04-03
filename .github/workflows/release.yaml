@@ -72,7 +72,8 @@ jobs:
               pwd
               cat deployment.yaml
               pwd
-              echo "commitID: ${{ env.TAG }}"
+              TAG=$(echo "${{ steps.meta.outputs.tags }}" | cut -d':' -f2)
+              echo "TagName = ${{ env.TAG }}"
               sed -i "s+shubh9975/images.*+shubh9975/images:${{ env.TAG }}+g" deployment.yaml
               cat deployment.yaml
               git add .

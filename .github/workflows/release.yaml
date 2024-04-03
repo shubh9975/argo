@@ -2,6 +2,8 @@ name: Build image on release
 
 on:
   push:
+    #branches: 
+      #- main
     tags: 
       - v*.*.*
 
@@ -63,6 +65,14 @@ jobs:
             with:
               repository: 'shubh9975/App-Manifest-'
               token: ${{ secrets.GIT_PASSWORD }}
+              
+          - name: Extract tag value
+            id: extract_tag
+            run: echo "::set-output name=tag_value::${GITHUB_REF#refs/tags/}"
+            
+          - name: Print tag value
+            run: echo "Tag value:" ${{ steps.extract_tag.outputs.tag_value }}
+            
           - name: modify the image
             run: |
               git config user.email shubham.tamboli1@gmail.com
@@ -70,9 +80,11 @@ jobs:
               pwd
               cat release-deployment.yaml
               pwd
+              
               echo "commitID: ${{ env.TAG }}"
               sed -i "s+shubh9975/images.*+${{ env.TAG }}+g" release-deployment.yaml
               cat release-deployment.yaml
+              
               git add .
               git commit -m 'Done  by Github Actions   Job change manifest: ${{ env.TAG }}'
               git push origin main
@@ -80,5 +92,5 @@ jobs:
               GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
               GIT_PASSWORD: ${{ secrets.GIT_PASSWORD }}
               RUN_NUMBER: ${{ github.run_number }}
-              TAG: ${{ steps.meta.outputs.tags }}
+              TAG: ${{ steps.extract_tag.outputs.tag_value }}
                 

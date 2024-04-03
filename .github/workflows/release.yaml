@@ -81,7 +81,7 @@ jobs:
               cat deployment.yaml
               pwd
               echo "TagName = ${{ env.TAG }}"
-              awk '{gsub("shubh9975/images:.*", "shubh9975/images:${{ $env.TAG }}")}1' deployment.yaml > tmpfile && mv tmpfile deployment.yaml
+              awk '{gsub("shubh9975/images:.*", "shubh9975/images:${{ env.TAG }}")}1' deployment.yaml > tmpfile && mv tmpfile deployment.yaml
               cat deployment.yaml
               git add .
               git commit -m 'Done  by Github Actions   Job change manifest: ${{ env.TAG }}'

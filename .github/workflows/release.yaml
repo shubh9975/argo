@@ -73,11 +73,11 @@ jobs:
               cat deployment.yaml
               pwd
               TAG=$(echo "${{ steps.meta.outputs.tags }}" | cut -d':' -f2)
-              echo "TagName = ${{ env.TAG }}"
-              sed -i "s+shubh9975/images.*+shubh9975/images:${{ env.TAG }}+g" deployment.yaml
+              echo "TagName = ${TAG}"
+              sed -i "s+shubh9975/images.*+shubh9975/images:${TAG}+g" deployment.yaml
               cat deployment.yaml
               git add .
-              git commit -m 'Done  by Github Actions   Job change manifest: ${{ env.TAG }}'
+              git commit -m 'Done  by Github Actions   Job change manifest: ${TAG}'
               git push origin main
             env:
               GIT_USERNAME: ${{ secrets.GIT_USERNAME }}

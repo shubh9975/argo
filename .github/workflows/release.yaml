@@ -1,25 +1,30 @@
-name: Build image on release
+name: CI
 
 on:
   push:
     branches:
       - main
       - master
+      - dev
 
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
+
       - name: Set up Python 3.10
         uses: actions/setup-python@v3
         with:
           python-version: "3.10"
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install flake8 pytest
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
@@ -27,37 +32,30 @@ jobs:
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: shubh9975/images
+      - name: Determine branch or tag
+        id: branch-or-tag
+        run: echo "::set-output name=is_tag::$(if [ -n \"$GITHUB_REF_NAME\" ]; then echo true; else echo false; fi)"
 
-      - name: Build and push the Docker image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+      - name: Modify image for dev
+        if: steps.branch-or-tag.outputs.is_tag == 'false' && github.ref == 'refs/heads/dev'
+        run: |
+          git config user.email shubham.tamboli1@gmail.com
+          git config user.name Shubham
+          pwd
+          cat dev-env/dev-deployment.yaml
+          pwd
+          echo "commitID: ${{ github.sha }}"
+          sed -i "s+shubh9975/images.*+shubh9975/images:${{ github.sha }}+g" dev-env/dev-deployment.yaml
+          cat dev-env/dev-deployment.yaml
+          git add .
+          git commit -m 'Done by Github Actions. Job change manifest: ${{ github.sha }}'
+          git push origin main
+        env:
+          GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
+          GIT_PASSWORD: ${{ secrets.GIT_PASSWORD }}
 
-      - name: changing the deployment of git repo
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      - name: Modify image for release
+        if: steps.branch-or-tag.outputs.is_tag == 'false' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         run: |
           git config user.email shubham.tamboli1@gmail.com
           git config user.name Shubham
@@ -70,10 +68,13 @@ jobs:
           git add .
           git commit -m 'Done by Github Actions. Job change manifest: ${{ github.sha }}'
           git push origin main
+        env:
+          GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
+          GIT_PASSWORD: ${{ secrets.GIT_PASSWORD }}
 
-      - name: Extract tag value
-        id: extract_tag
-        run: echo "::set-output name=tag_value::${GITHUB_REF#refs/tags/}"
-
-      - name: Print tag value
-        run: echo "Tag value:" ${{ steps.extract_tag.outputs.tag_value }}
+      - name: Build and push Docker image for tag
+        if: steps.branch-or-tag.outputs.is_tag == 'true'
+        run: |
+          docker build -t shubh9975/images:${GITHUB_REF#refs/tags/} .
+          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+          docker push shubh9975/images:${GITHUB_REF#refs/tags/}

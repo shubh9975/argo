@@ -83,6 +83,7 @@ jobs:
               cat dev-env/dev-deployment.yaml
               pwd
               echo "commitID: ${{ env.COMMIT_SHA }}"
+              #sed -i "s+shubh9975/images.*+shubh9975/images:${{ env.COMMIT_SHA }}+g" dev-env/dev-deployment.yaml
               sed -i "s+shubh9975/images.*+shubh9975/images:${{ env.COMMIT_SHA }}+g" dev-env/dev-deployment.yaml
               cat dev-env/dev-deployment.yaml
               git add .

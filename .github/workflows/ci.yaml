@@ -1,11 +1,12 @@
-name: Build image on release
+name: Python application
 
 on:
   push:
-    #branches: 
-      #- main
-    tags: 
-      - v*.*.*
+    branches: 
+      - dev
+
+env:
+  REPO_NAME: shubh9975/images
 
 jobs:
   build:
@@ -27,30 +28,40 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-  release:
+  development:
         needs: build
         runs-on: ubuntu-latest
         steps:
-          -
-            name: Checkout
+          - name: Checkout
             uses: actions/checkout@v3
-          -
-            name: Set up QEMU
+          - name: Set up QEMU
             uses: docker/setup-qemu-action@v2
-          -
-            name: Set up Docker Buildx
+          - name: Set up Docker Buildx
             uses: docker/setup-buildx-action@v2
-          -
-            name: Login to Docker Hub
+          - name: Login to Docker Hub
             uses: docker/login-action@v3
             with:
               username: ${{ secrets.DOCKERHUB_USERNAME }}
               password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+          - name: Set HEAD SHA SHORT
+            id: head_sha_short
+            run: |
+              echo "::set-output name=head_sha_short::$(git rev-parse --short HEAD)"
+            shell: bash
+          - name: Check HEAD SHA SHORT
+            run: echo ${{ steps.head_sha_short.outputs.head_sha_short }}
+            shell: bash
+        
           - name: Docker meta
             id: meta
             uses: docker/metadata-action@v4
             with:
-              images: shubh9975/images
+              flavor: |
+                latest=false
+              images: ${{ env.REPO_NAME }}
+              tags: |
+                type=raw,value=${{ steps.head_sha_short.outputs.head_sha_short }}
 
           - name: Build and push the Docker image
             uses: docker/build-push-action@v4
@@ -59,38 +70,26 @@ jobs:
               push: true
               tags: ${{ steps.meta.outputs.tags }}
               labels: ${{ steps.meta.outputs.labels }}
-
           - uses: actions/checkout@v3
             name: changing the deployment of git repo
             with:
               repository: 'shubh9975/App-Manifest-'
               token: ${{ secrets.GIT_PASSWORD }}
-              
-          - name: Extract tag value
-            id: extract_tag
-            run: echo "::set-output name=tag_value::${GITHUB_REF#refs/tags/}"
-            
-          - name: Print tag value
-            run: echo "Tag value:" ${{ steps.extract_tag.outputs.tag_value }}
-            
           - name: modify the image
             run: |
               git config user.email shubham.tamboli1@gmail.com
               git config user.name Shubham
               pwd
-              cat prod-env/release-deployment.yaml
+              cat dev-env/dev-deployment.yaml
               pwd
-              
-              echo "commitID: ${{ env.TAG }}"
-              awk '{gsub("shubh9975/images:.*", "shubh9975/images:${{ env.TAG }}")}1' deployment.yaml > tmpfile && mv tmpfile deployment.yaml
-              cat prod-env/release-deployment.yaml
-              
+              echo "commitID: ${{ env.COMMIT_SHA }}"
+              sed -i "s+shubh9975/images.*+shubh9975/images:${{ env.COMMIT_SHA }}+g" dev-env/dev-deployment.yaml
+              cat dev-env/dev-deployment.yaml
               git add .
-              git commit -m 'Done  by Github Actions   Job change manifest: ${{ env.TAG }}'
+              git commit -m 'Done  by Github Actions   Job change manifest: ${{ env.COMMIT_SHA }}'
               git push origin main
             env:
               GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
               GIT_PASSWORD: ${{ secrets.GIT_PASSWORD }}
               RUN_NUMBER: ${{ github.run_number }}
-              TAG: ${{ steps.extract_tag.outputs.tag_value }}
-                
+              COMMIT_SHA: ${{ steps.meta.outputs.tags }}

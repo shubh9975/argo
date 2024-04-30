@@ -1,16 +1,18 @@
-name: Pull Request Message
+name: Notify on PR Merge
 
 on:
   pull_request:
-    types: [opened, reopened, closed]
+    types: [closed]
 
 jobs:
-  display_message:
+  notify_on_merge:
     runs-on: ubuntu-latest
     steps:
-      - name: Check if PR is opened or merged
-        id: check_pr
-        run: echo "PR Action: ${{ github.event.action }}"
-      - name: Display Message
-        if: steps.check_pr.outputs.check_pr == 'opened' || steps.check_pr.outputs.check_pr == 'closed'
-        run: echo "Code is properly formatted and meets requirements."
+      - name: Check if PR is merged
+        if: github.event.pull_request.merged == true
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
+            -d '{"body": "🎉 This pull request has been merged. Thank you for your contribution!"}'

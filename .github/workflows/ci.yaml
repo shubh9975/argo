@@ -1,52 +1,18 @@
-name: Pre-Merge Checks
+name: Notify on PR Merge
 
 on:
   pull_request:
-    types: [synchronize, opened, reopened]
+    types: [closed]
 
 jobs:
-  pre_merge_checks:
+  notify_on_merge:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-      
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v3
-        with:
-          python-version: "3.10"
-      
-      - name: Install Dependencies
+      - name: Check if PR is merged
+        if: github.event.pull_request.merged == true
         run: |
-          python -m pip install --upgrade pip
-          pip install flake8 pytest
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      
-      - name: Lint with Flake8
-        run: |
-          # Stop the build if there are Python syntax errors or undefined names
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          # Exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-      
-      - name: Run Unit Tests
-        run: pytest
-      
-      - name: Check Code Coverage
-        run: |
-          # Run code coverage checks here
-      
-      - name: Build and Test Docker Image
-        run: |
-          # Build and test Docker image here
-      
-      - name: Deploy Test Environment
-        run: |
-          # Deploy to test environment for further testing
-      
-      - name: Prompt for Manual Approval
-        if: success()
-        uses: juliangruber/approve-pull-request-action@v1
-        with:
-          message: "Code has passed all checks. Please review and approve the pull request for merging."
-
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
+            -d '{"body": "🎉 This pull request has been merged. Thank you for your contribution!"}'

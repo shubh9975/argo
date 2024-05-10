@@ -3,7 +3,7 @@ name: Python application
 on:
   push:
     branches: 
-      - dev
+      - dev 
 
 env:
   REPO_NAME: shubh9975/images
